@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Text Extractor - OCR Made Beautiful</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .upload-section {
+            margin-bottom: 40px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 16px;
+            padding: 60px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .upload-area:hover::before {
+            left: 100%;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+        }
+
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            color: #667eea;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .upload-text {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .upload-subtext {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .browse-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .browse-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+        }
+
+        .result-image {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .result-image img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .ocr-results {
+            display: grid;
+            gap: 20px;
+        }
+
+        .ocr-method {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid #667eea;
+            transition: transform 0.3s ease;
+        }
+
+        .ocr-method:hover {
+            transform: translateY(-2px);
+        }
+
+        .ocr-method:nth-child(2) {
+            border-left-color: #764ba2;
+        }
+
+        .ocr-method:nth-child(3) {
+            border-left-color: #f093fb;
+        }
+
+        .method-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .method-icon {
+            font-size: 1.5rem;
+        }
+
+        .method-text {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #333;
+            min-height: 100px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .copy-btn {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .copy-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .error {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .success-animation {
+            animation: slideInUp 0.5s ease;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .reset-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .upload-area {
+                padding: 40px 15px;
+            }
+
+            .upload-icon {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-magic"></i> AI Text Extractor</h1>
+            <p>Upload an image and extract text using advanced OCR technology</p>
+        </div>
+
+        <div id="upload-section" class="upload-section">
+            <div class="upload-area" onclick="document.getElementById('file-input').click()">
+                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                <div class="upload-text">Drop your image here or click to browse</div>
+                <div class="upload-subtext">Supports JPG, PNG, GIF, BMP, TIFF (Max 16MB)</div>
+                <button type="button" class="browse-btn">
+                    <i class="fas fa-folder-open"></i> Choose File
+                </button>
+                <input type="file" id="file-input" class="file-input" accept="image/*">
+            </div>
+        </div>
+
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Processing your image with AI magic... ✨</p>
+        </div>
+
+        <div id="results" class="results">
+            <div class="result-image">
+                <img id="result-img" src="" alt="Processed Image">
+            </div>
+
+            <div class="ocr-results">
+                <div class="ocr-method">
+                    <div class="method-title">
+                        <i class="fas fa-robot method-icon" style="color: #667eea;"></i>
+                        Tesseract OCR
+                    </div>
+                    <div id="tesseract-result" class="method-text"></div>
+                    <button class="copy-btn" onclick="copyText('tesseract-result')">
+                        <i class="fas fa-copy"></i> Copy Text
+                    </button>
+                </div>
+
+                <div class="ocr-method">
+                    <div class="method-title">
+                        <i class="fas fa-eye method-icon" style="color: #764ba2;"></i>
+                        EasyOCR
+                    </div>
+                    <div id="easyocr-result" class="method-text"></div>
+                    <button class="copy-btn" onclick="copyText('easyocr-result')">
+                        <i class="fas fa-copy"></i> Copy Text
+                    </button>
+                </div>
+
+                <div class="ocr-method">
+                    <div class="method-title">
+                        <i class="fas fa-brain method-icon" style="color: #f093fb;"></i>
+                        Custom EMNIST Model
+                    </div>
+                    <div id="custom-result" class="method-text"></div>
+                    <button class="copy-btn" onclick="copyText('custom-result')">
+                        <i class="fas fa-copy"></i> Copy Text
+                    </button>
+                </div>
+            </div>
+
+            <div style="text-align: center;">
+                <button class="reset-btn" onclick="resetApp()">
+                    <i class="fas fa-redo"></i> Process Another Image
+                </button>
+            </div>
+        </div>
+
+        <div id="error" class="error" style="display: none;"></div>
+    </div>
+
+    <script>
+        const uploadArea = document.querySelector('.upload-area');
+        const fileInput = document.getElementById('file-input');
+        const uploadSection = document.getElementById('upload-section');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const error = document.getElementById('error');
+
+        // Drag and drop functionality
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                showError('Please select a valid image file.');
+                return;
+            }
+
+            if (file.size > 16 * 1024 * 1024) {
+                showError('File size must be less than 16MB.');
+                return;
+            }
+
+            uploadFile(file);
+        }
+
+        function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            uploadSection.style.display = 'none';
+            loading.style.display = 'block';
+            results.style.display = 'none';
+            error.style.display = 'none';
+
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    showError(data.error || 'An error occurred while processing the image.');
+                }
+            })
+            .catch(err => {
+                loading.style.display = 'none';
+                showError('Network error. Please try again.');
+                console.error('Error:', err);
+            });
+        }
+
+        function displayResults(data) {
+            // Display image
+            const resultImg = document.getElementById('result-img');
+            resultImg.src = `data:image/jpeg;base64,${data.image}`;
+
+            // Display OCR results
+            document.getElementById('tesseract-result').textContent = data.results.tesseract || 'No text detected';
+            document.getElementById('easyocr-result').textContent = data.results.easyocr || 'No text detected';
+            document.getElementById('custom-result').textContent = data.results.custom || 'Model not available';
+
+            results.style.display = 'block';
+            results.classList.add('success-animation');
+        }
+
+        function showError(message) {
+            error.textContent = message;
+            error.style.display = 'block';
+            uploadSection.style.display = 'block';
+        }
+
+        function copyText(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                // Visual feedback
+                const btn = event.target.closest('.copy-btn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                btn.style.background = '#28a745';
+                btn.style.borderColor = '#28a745';
+                btn.style.color = 'white';
+
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = 'transparent';
+                    btn.style.borderColor = '#667eea';
+                    btn.style.color = '#667eea';
+                }, 2000);
+            });
+        }
+
+        function resetApp() {
+            uploadSection.style.display = 'block';
+            loading.style.display = 'none';
+            results.style.display = 'none';
+            error.style.display = 'none';
+            fileInput.value = '';
+        }
+    </script>
+</body>
+</html>
