@@ -1,12 +1,10 @@
-# Flask OCR Application Requirements
-
 # Web Framework
 Flask==2.3.3
 Werkzeug==2.3.7
 
 # Image Processing
 opencv-python==4.8.1.78
-Pillow==10.0.1
+Pillow==9.5.0
 numpy==1.24.3
 
 # OCR Libraries
@@ -22,19 +20,6 @@ scikit-learn==1.3.0
 matplotlib==3.7.2
 scipy==1.11.3
 
-# Optional: For better performance
+# Optional Performance
 # torch==2.0.1
 # torchvision==0.15.2
-
-# Installation Instructions:
-# 1. Install Tesseract OCR:
-#    - Windows: Download from https://github.com/UB-Mannheim/tesseract/wiki
-#    - Ubuntu/Debian: sudo apt install tesseract-ocr
-#    - macOS: brew install tesseract
-#
-# 2. Install Python packages:
-#    pip install -r requirements.txt
-#
-# 3. For EasyOCR, it will download models on first use (requires internet)
-#
-# 4. Make sure to have sufficient disk space for models (~500MB for EasyOCR models)
