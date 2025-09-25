@@ -1,12 +1,9 @@
 Flask==2.3.3
-Werkzeug==2.3.7
-opencv-python-headless==4.8.1.78  # headless avoids GUI deps
-Pillow==9.4.0                       # slightly older, builds reliably
-numpy==1.24.3
-pytesseract==0.3.10
-easyocr==1.7.0
-tensorflow-cpu==2.13.0              # CPU-only avoids heavy GPU deps
-keras==2.13.1
-scikit-learn==1.3.0
-matplotlib==3.7.1                   # compatible prebuilt wheel
-scipy==1.11.3
+numpy==1.26.5
+opencv-python-headless==4.8.1.78
+Pillow==10.1.0
+tensorflow-cpu==2.13.0
+easyocr==1.6.2
+pytesseract==0.3.11
+scikit-learn==1.3.2
+matplotlib==3.8.0
